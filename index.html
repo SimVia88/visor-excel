@@ -22,34 +22,44 @@
 <body>
 
 <h2>Contenido del Excel - ABRIL</h2>
-<table id="tablaExcel" class="display"></table>
+<table id="tablaExcel" class="display" style="width:100%"></table>
 
 <script>
   async function cargarExcel() {
-    const url = 'https://raw.githubusercontent.com/SimVia88/visor-excel/main/Diario-ambiental-de-obra-ABRIL.xlsx';
+    const url = 'https://raw.githubusercontent.com/SimVia88/visor-excel/main/ABRIL.xlsx';
     const res = await fetch(url);
     const data = await res.arrayBuffer();
     const workbook = XLSX.read(data, { type: 'array' });
     const hoja = workbook.SheetNames[0];
     const filas = XLSX.utils.sheet_to_json(workbook.Sheets[hoja], { header: 1 });
 
-    const encabezados = filas[5]; // Fila 6 en Excel
-    const registros = filas.slice(6); // A partir de la fila 7 (datos reales)
+    const encabezado1 = filas[5]; // Fila 6 del Excel
+    const encabezado2 = filas[6]; // Fila 7 del Excel
+    const registros = filas.slice(7); // Datos reales
 
-    let html = '<thead><tr>';
-    encabezados.forEach(col => html += `<th>${col}</th>`);
-    html += '</tr></thead><tbody>';
+    let html = '<thead>';
+    html += '<tr>';
+    encabezado1.forEach(col => html += `<th>${col ?? ''}</th>`);
+    html += '</tr><tr>';
+    encabezado2.forEach(col => html += `<th>${col ?? ''}</th>`);
+    html += '</tr>';
+    html += '</thead><tbody>';
+
     registros.forEach(fila => {
       html += '<tr>';
-      encabezados.forEach((_, i) => {
+      encabezado1.forEach((_, i) => {
         html += `<td>${fila[i] ?? ''}</td>`;
       });
       html += '</tr>';
     });
+
     html += '</tbody>';
 
     $('#tablaExcel').html(html);
-    $('#tablaExcel').DataTable({ scrollX: true });
+    $('#tablaExcel').DataTable({
+      scrollX: true,
+      fixedHeader: true
+    });
   }
 
   cargarExcel();

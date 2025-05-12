@@ -2,56 +2,57 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Visor Excel - Abril</title>
+  <title>Visor Excel - ABRIL</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; margin: 30px; }
-    table { width: 100%; }
+    table.dataTable thead th {
+      background-color: #d6f5d6;
+      font-weight: bold;
+      border-bottom: 2px solid #333;
+    }
+    table.dataTable tbody td {
+      border-bottom: 1px solid #ccc;
+    }
   </style>
 </head>
 <body>
 
-<h2>Contenido del Excel - Abril</h2>
+<h2>Contenido del Excel - ABRIL</h2>
 <table id="tablaExcel" class="display"></table>
 
 <script>
-  async function cargarExcelDesdeGitHub() {
-    const url = 'https://raw.githubusercontent.com/SimVia88/visor-excel/main/ABRIL.xlsx';
-
-    const response = await fetch(url);
-    if (!response.ok) {
-      document.getElementById('tablaExcel').innerHTML = '<p>Error al cargar el archivo Excel (404 o ruta incorrecta).</p>';
-      return;
-    }
-
-    const arrayBuffer = await response.arrayBuffer();
-    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+  async function cargarExcel() {
+    const url = 'https://raw.githubusercontent.com/SimVia88/visor-excel/main/Diario-ambiental-de-obra-ABRIL.xlsx';
+    const res = await fetch(url);
+    const data = await res.arrayBuffer();
+    const workbook = XLSX.read(data, { type: 'array' });
     const hoja = workbook.SheetNames[0];
-    const datos = XLSX.utils.sheet_to_json(workbook.Sheets[hoja], { header: 1 });
+    const filas = XLSX.utils.sheet_to_json(workbook.Sheets[hoja], { header: 1 });
 
-    if (!datos.length) {
-      document.getElementById('tablaExcel').innerHTML = '<p>El archivo Excel está vacío o mal formateado.</p>';
-      return;
-    }
+    const encabezados = filas[5]; // Fila 6 en Excel
+    const registros = filas.slice(6); // A partir de la fila 7 (datos reales)
 
     let html = '<thead><tr>';
-    datos[0].forEach(col => { html += `<th>${col}</th>`; });
+    encabezados.forEach(col => html += `<th>${col}</th>`);
     html += '</tr></thead><tbody>';
-    for (let i = 1; i < datos.length; i++) {
+    registros.forEach(fila => {
       html += '<tr>';
-      datos[i].forEach(col => { html += `<td>${col ?? ''}</td>`; });
+      encabezados.forEach((_, i) => {
+        html += `<td>${fila[i] ?? ''}</td>`;
+      });
       html += '</tr>';
-    }
+    });
     html += '</tbody>';
 
     $('#tablaExcel').html(html);
-    $('#tablaExcel').DataTable();
+    $('#tablaExcel').DataTable({ scrollX: true });
   }
 
-  cargarExcelDesdeGitHub();
+  cargarExcel();
 </script>
 
 </body>

@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Visor Excel Interactivo</title>
+  <title>Visor Excel - Abril</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
@@ -14,18 +14,28 @@
 </head>
 <body>
 
-<h2>Contenido del Excel</h2>
+<h2>Contenido del Excel - Abril</h2>
 <table id="tablaExcel" class="display"></table>
 
 <script>
   async function cargarExcelDesdeGitHub() {
-    const url = 'https://raw.githubusercontent.com/simvia88/visor-excel/main/ABRIL.xlsx.xlsx';
+    const url = 'https://raw.githubusercontent.com/SimVia88/visor-excel/main/ABRIL.xlsx';
 
     const response = await fetch(url);
+    if (!response.ok) {
+      document.getElementById('tablaExcel').innerHTML = '<p>Error al cargar el archivo Excel (404 o ruta incorrecta).</p>';
+      return;
+    }
+
     const arrayBuffer = await response.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: 'array' });
     const hoja = workbook.SheetNames[0];
     const datos = XLSX.utils.sheet_to_json(workbook.Sheets[hoja], { header: 1 });
+
+    if (!datos.length) {
+      document.getElementById('tablaExcel').innerHTML = '<p>El archivo Excel está vacío o mal formateado.</p>';
+      return;
+    }
 
     let html = '<thead><tr>';
     datos[0].forEach(col => { html += `<th>${col}</th>`; });

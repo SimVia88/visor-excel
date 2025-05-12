@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Visor Excel Interactivo</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; }
+    table { width: 100%; }
+  </style>
+</head>
+<body>
+
+<h2>Contenido del Excel</h2>
+<table id="tablaExcel" class="display"></table>
+
+<script>
+  async function cargarExcelDesdeGitHub() {
+    const url = 'https://raw.githubusercontent.com/simvia88/TU_REPOSITORIO/main/datos.xlsx';
+
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+    const hoja = workbook.SheetNames[0];
+    const datos = XLSX.utils.sheet_to_json(workbook.Sheets[hoja], { header: 1 });
+
+    let html = '<thead><tr>';
+    datos[0].forEach(col => { html += `<th>${col}</th>`; });
+    html += '</tr></thead><tbody>';
+    for (let i = 1; i < datos.length; i++) {
+      html += '<tr>';
+      datos[i].forEach(col => { html += `<td>${col ?? ''}</td>`; });
+      html += '</tr>';
+    }
+    html += '</tbody>';
+
+    $('#tablaExcel').html(html);
+    $('#tablaExcel').DataTable();
+  }
+
+  cargarExcelDesdeGitHub();
+</script>
+
+</body>
+</html>
